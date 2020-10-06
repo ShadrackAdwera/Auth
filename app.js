@@ -12,6 +12,19 @@ const csrfProtection = csrf()
 app.use(bodyParser.json())
 app.use(csrfProtection)
 
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    );
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'PUT, PATCH, POST, DELETE, GET'
+    );
+    next();
+  });
+
 app.use((req,res,next)=>{
     res.locals.csrfToken = req.csrfToken()
 })
