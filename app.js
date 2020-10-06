@@ -1,13 +1,20 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
+const csrf = require('csurf')
 
 const HttpError = require('./models/http-error')
 const authRoutes = require('./routes/auth-route')
 
 const app = express()
+const csrfProtection = csrf()
 
 app.use(bodyParser.json())
+app.use(csrfProtection)
+
+app.use((req,res,next)=>{
+    res.locals.csrfToken = req.csrfToken()
+})
 
 app.use('/api/auth', authRoutes)
 
@@ -28,5 +35,5 @@ mongoose.connect(process.env.DB_STRING, { useUnifiedTopology: true, useNewUrlPar
     console.log('COnnected to DB...')
     app.listen(5000)
 }).catch(error=>{
-    console.log(error)
+    console.log(error.message)
 })
