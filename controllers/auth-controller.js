@@ -108,3 +108,6 @@ const login = async (req, res, next) => {
     });
 };
 
+exports.signUp = signUp
+exports.login = login
+
