@@ -52,10 +52,53 @@ const signUp = async (req, res, next) => {
     return next(new HttpError('Unable to generate tokens', 500));
   }
 
+  res.status(201).json({
+    message: 'Sign up successful',
+    user: {
+      id: newUser._id.toString(),
+      name: newUser.name,
+      email: newUser.email,
+      token: token,
+    },
+  });
+};
+
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  let foundEmail;
+  let isPassword;
+  let token;
+
+  try {
+    foundEmail = await User.findOne({ email: email });
+  } catch (error) {
+    return next(new HttpError('Unable to find emails', 500));
+  }
+  if (!foundEmail) {
+    return next(new HttpError('Email dont exist! Sign up instead', 422));
+  }
+
+  try {
+    isPassword = await bcrypt.compare(password, foundEmail.password);
+  } catch (error) {
+    return next(new HttpError('Unable to compare passwords', 500));
+  }
+
+  if (!isPassword) {
+    return next(new HttpError('Wrong password', 422));
+  }
+
+  try {
+    token = jwt.sign({ id: foundEmail.id, email: foundEmail.email });
+  } catch (error) {
+    return next(new HttpError('Token generation failed!', 500));
+  }
+
   res
-    .status(201)
+    .status(200)
     .json({
-      message: 'Sign up successful',
+      message: 'Login Successful',
       user: {
         id: newUser._id.toString(),
         name: newUser.name,
@@ -64,5 +107,4 @@ const signUp = async (req, res, next) => {
       },
     });
 };
-
 
