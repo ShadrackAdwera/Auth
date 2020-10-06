@@ -3,23 +3,28 @@ const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 
 const HttpError = require('./models/http-error')
+const authRoutes = require('./routes/auth-route')
 
 const app = express()
 
 app.use(bodyParser.json())
 
-app.use((req,res,next)=>{
-    throw new HttpError('Unable to find method | path', 500)
-})
+app.use('/api/auth', authRoutes)
 
-app.use((error, req, res, next)=>{
-    if(res.headerSent){
-        return next(error)
+app.use((req, res, next) => {
+    throw new HttpError('Could not find the method / route. Try Again', 500);
+  });
+  
+  app.use((error, req, res, next) => {
+    if (res.headerSent) {
+      return next(error);
     }
-    res.status(error.status | 500).json({message: error.message | 'Unable to complete request'})
-})
+    res
+      .status(error.code || 500)
+      .json({ error: error.message || 'An error occured, try again' });
+  });
 
-mongoose.connect(process.env.DB_STRING, { useUnifiedTopology: true, useNewUrlParser: true }).then(()=>{
+mongoose.connect(process.env.DB_STRING, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true }).then(()=>{
     console.log('COnnected to DB...')
     app.listen(5000)
 }).catch(error=>{

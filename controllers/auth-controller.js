@@ -44,7 +44,7 @@ const signUp = async (req, res, next) => {
 
   try {
     token = jwt.sign(
-      { id: newUser.id, email: newUser.email },
+      { userId: newUser.id, email: newUser.email },
       'keepmeasecret',
       { expiresIn: '1h' }
     );
@@ -90,7 +90,7 @@ const login = async (req, res, next) => {
   }
 
   try {
-    token = jwt.sign({ id: foundEmail.id, email: foundEmail.email });
+    token = jwt.sign({ userId: foundEmail.id, email: foundEmail.email },'keepmeasecret',{expiresIn:'1h'});
   } catch (error) {
     return next(new HttpError('Token generation failed!', 500));
   }
@@ -100,9 +100,9 @@ const login = async (req, res, next) => {
     .json({
       message: 'Login Successful',
       user: {
-        id: newUser._id.toString(),
-        name: newUser.name,
-        email: newUser.email,
+        id: foundEmail._id.toString(),
+        name: foundEmail.name,
+        email: foundEmail.email,
         token: token,
       },
     });
