@@ -499,7 +499,7 @@ const resetPassword = async(req,res,next) => {
 
   <!-- start preheader -->
   <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;">
-    A preheader is the short summary text that follows the subject line when an email is viewed in the inbox.
+    Email Reset.
   </div>
   <!-- end preheader -->
 
@@ -626,16 +626,18 @@ const updatePassword = async(req,res,next) => {
   try {
     foundUser = await User.findOne({resetToken: token, resetTokenExpiration: {$gt: Date.now()}})
   } catch (error) {
+    console.log(error.message)
     return next(new HttpError('Unable yo verify user',500))
   }
+  console.log(foundUser)
   if(!foundUser) {
     return next(new HttpError('Unable to reset password, try again',500))
   }
-  if(req.userData.userId !==foundUser._id.toString()) {
-    return next(new HttpError('You are not authorized to perform this action',403))
-  }
+  // if(req.userData.userId !==foundUser._id.toString()) {
+  //   return next(new HttpError('You are not authorized to perform this action',403))
+  // }
   try {
-    hashedPassword = bcrypt.hash(newPassword, 12)
+    hashedPassword = await bcrypt.hash(newPassword, 12)
   } catch (error) {
     return next(new HttpError('Reset failed!',500))
   }
@@ -647,7 +649,7 @@ const updatePassword = async(req,res,next) => {
   try {
     await foundUser.save()
   } catch (error) {
-    return next(new HttpError('Reset failed!',500))
+    return next(new HttpError('==>Reset failed!',500))
   }
   res.status(200).json({message: 'Successfully Reset Password'})
 
