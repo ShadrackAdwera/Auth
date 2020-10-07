@@ -636,6 +636,8 @@ const updatePassword = async(req,res,next) => {
   }
 
   foundUser.password = hashedPassword
+  foundUser.resetToken = null
+  foundUser.resetTokenExpiration = null
 
   try {
     await foundUser.save()
