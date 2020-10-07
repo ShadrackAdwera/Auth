@@ -603,7 +603,6 @@ const resetPassword = async(req,res,next) => {
 
 </body>
 </html>
-
         `
       })
       console.log('Were here now...')
@@ -612,6 +611,38 @@ const resetPassword = async(req,res,next) => {
       return next(new HttpError('Server error',500))
     }
   })
+}
+
+const updatePassword = async(req,res,next) => {
+  const { newPassword } = req.body
+  let foundUser
+  let hashedPassword
+  const token = req.params.token
+  try {
+    foundUser = await User.findOne({resetToken: token, resetTokenExpiration: {$gt: Date.now()}})
+  } catch (error) {
+    return next(new HttpError('Unable yo verify user',500))
+  }
+  if(!foundUser) {
+    return next(new HttpError('Unable to reset password, try again',500))
+  }
+  if(req.userData.userId !==foundUser._id.toString()) {
+    return next(new HttpError('You are not authorized to perform this action',403))
+  }
+  try {
+    hashedPassword = bcrypt.hash(newPassword, 12)
+  } catch (error) {
+    return next(new HttpError('Reset failed!',500))
+  }
+
+  foundUser.password = hashedPassword
+
+  try {
+    await foundUser.save()
+  } catch (error) {
+    return next(new HttpError('Reset failed!',500))
+  }
+  res.status(200).json({message: 'Successfully Reset Password'})
 
 }
 
