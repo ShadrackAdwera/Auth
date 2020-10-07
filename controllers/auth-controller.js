@@ -395,7 +395,7 @@ const resetPassword = (req,res,next) => {
         `
       })
     } catch (error) {
-      
+      return next(new HttpError('Server error',500))
     }
   })
 
@@ -403,4 +403,5 @@ const resetPassword = (req,res,next) => {
 
 exports.signUp = signUp
 exports.login = login
+exports.resetPassword = resetPassword
 

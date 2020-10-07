@@ -17,5 +17,7 @@ router.post(
 
 router.post('/login', authController.login)
 
+router.post('/reset-password', check('email').normalizeEmail().isEmail() ,authController.resetPassword)
+
 module.exports = router
 
