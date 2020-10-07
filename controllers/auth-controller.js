@@ -614,6 +614,11 @@ const resetPassword = async(req,res,next) => {
 }
 
 const updatePassword = async(req,res,next) => {
+  const error = validationResult(req)
+  if(!error.isEmpty()) {
+    return next(new HttpError('Password too short',422))
+  }
+
   const { newPassword } = req.body
   let foundUser
   let hashedPassword
@@ -651,4 +656,4 @@ const updatePassword = async(req,res,next) => {
 exports.signUp = signUp
 exports.login = login
 exports.resetPassword = resetPassword
-
+exports.updatePassword = updatePassword

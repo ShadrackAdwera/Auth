@@ -19,5 +19,7 @@ router.post('/login', authController.login)
 
 router.post('/reset-password', check('email').normalizeEmail().isEmail() ,authController.resetPassword)
 
+router.patch('/reset-password/:token', check('newPassword').isLength({ min: 6 }), authController.updatePassword)
+
 module.exports = router
 
