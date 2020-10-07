@@ -1,20 +1,20 @@
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken')
 
-const HttpError = require('../models/http-error');
+const HttpError = require('../models/http-error')
 
-module.exports = (req, res, next) => {
-    if(req.method==="OPTIONS") {
-        return next()
-    }
-  try {
-    const token = req.headers.authorization.split(' ')[1];
-    if (!token) {
-      throw new Error('Auth failed!');
-    }
-    const decodedToken = jwt.verify(token, 'keepmesafe')
-    req.userData = { userId: decodedToken.userId }
-    next()
-  } catch (error) {
-    return next(new HttpError('AUth failed!', 401));
+module.exports = (req,res,next) => {
+  if(req.method==="OPTIONS") {
+    return next()
   }
-};
+  try {
+   const token = req.headers.authorization.split(" ")[1]
+   if(!token) {
+     return next(new HttpError('Invalid token',401))
+   }
+   const decodedToken = jwt.verify(token, 'keepmeasecret')
+   req.userData = { userId: decodedToken.userId }
+   next()  
+  } catch (error) {
+    return next(new HttpError('Invalid token', 401))
+  }
+}

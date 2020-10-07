@@ -1,16 +1,18 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
-const csrf = require('csurf')
+//const cookieParser = require('cookie-parser')
+//const csrf = require('csurf')
 
 const HttpError = require('./models/http-error')
 const authRoutes = require('./routes/auth-route')
 
+//const csrfProtection = csrf({cookie: true })
 const app = express()
-const csrfProtection = csrf()
 
 app.use(bodyParser.json())
-app.use(csrfProtection)
+//app.use(cookieParser())
+//app.use(csrfProtection)
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -25,9 +27,9 @@ app.use((req, res, next) => {
     next();
   });
 
-app.use((req,res,next)=>{
-    res.locals.csrfToken = req.csrfToken()
-})
+// app.use((req,res,next)=>{
+//     res.locals.csrfToken = req.csrfToken()
+// })
 
 app.use('/api/auth', authRoutes)
 
@@ -45,7 +47,7 @@ app.use((req, res, next) => {
   });
 
 mongoose.connect(process.env.DB_STRING, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true }).then(()=>{
-    console.log('COnnected to DB...')
+    console.log('Connected to DB...')
     app.listen(5000)
 }).catch(error=>{
     console.log(error.message)
