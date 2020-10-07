@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer')
 const sendGridTransport = require('nodemailer-sendgrid-transport')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto')
 const { validationResult } = require('express-validator');
 
 
@@ -354,6 +355,51 @@ const login = async (req, res, next) => {
       },
     });
 };
+
+const resetPassword = (req,res,next) => {
+  const error = validationResult(req)
+  if(!error.isEmpty()) {
+    return next(new HttpError('Invalid email, try again',422))
+  }
+  const { email } = req.body
+  let foundEmail
+  
+  try {
+    foundEmail = await User.findOne({email: email})
+  } catch (error) {
+    return next(new HttpError('Unable to fetch email',500))
+  }
+  if(!foundEmail) {
+    return next(new HttpError('Email does not exist!',422))
+  }
+  crypto.randomBytes(32, (err, buffer)=>{
+    if(err) {
+      console.log(err)
+      return next(new HttpError('Server error',500))
+    }
+    const token = buffer.toString('hex')
+    foundEmail.resetToken = token
+    foundEmail.resetTokenExpiration = Date.now() + 3600000
+    try {
+      await foundEmail.save()
+    } catch (error) {
+      return next(new HttpError('Unable to save user',500))
+    }
+    try {
+      await transporter.sendMail({
+        from:"adwera.shadrack@gmail.com",
+        to: email,
+        subject:"Email Reset",
+        html:`<p>You requested a password reset!</p>
+        <p>Click on this <a href="http://localhost:3000/reset-password/${token}">link<a/> to reset the password</p>
+        `
+      })
+    } catch (error) {
+      
+    }
+  })
+
+}
 
 exports.signUp = signUp
 exports.login = login
